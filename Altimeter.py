@@ -22,6 +22,8 @@ with open(sys.argv[1], 'rb') as log:
     # File pointer
     i = 0
     num_bytes = log.tell()
+
+    # Dummy values for pressure calculations
     min = 100000000
     av = []
     
@@ -48,10 +50,12 @@ with open(sys.argv[1], 'rb') as log:
             payload = log.read(4)
             pressure = struct.unpack('<I', payload)
             print("Time = ", systick, "s", "    Pressure = ", pressure[0]/100.0, "mBar")
+
+        # Add first 10 values for average pressure at 0 height    
         if i < 11*128:
             av.append(pressure[0])
 
-
+        # Set min pressure
         if pressure[0] < min:
             min = pressure [0]
 
@@ -60,10 +64,17 @@ with open(sys.argv[1], 'rb') as log:
                    
         # Increment file pointer
         i += 128
+
+        
     print('Minimum value of pressure is ', min/100, ' mBar')
+
+    # Calculate average ground pressure
     ave = sum(av)/len(av)
-    min = 97772
+
+    # Set necessary constants
     rho = 1.225
     g = 9.81
+
+    # Calculate height from pressure (assume air density constant)
     h = abs(ave-min)/(g*rho)
     print('The maximum height reached is {0:.2f}'.format(h) + ' m')
